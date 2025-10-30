@@ -1,12 +1,5 @@
 # Build folders
 /build/
-bin/
-out/
-dist/
-debug/
-release/
-
-
 
 # VSCode settings
 .vscode/
