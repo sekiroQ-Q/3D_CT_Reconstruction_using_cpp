@@ -1,163 +1,166 @@
 # CT Reconstruction - Pure C++ Implementation
 
-Complete implementation of SART, SIRT, and MART algorithms for CT reconstruction in pure C++.
+A complete **CPU-based implementation** of **SART**, **SIRT**, and **MART** algorithms for Computed Tomography (CT) reconstruction in **pure C++**.  
+This project does not rely on GPU acceleration and may run slowly for large volumes, but provides full control and transparency over the reconstruction process.
+
+---
 
 ## Features
 
-✅ **Three Reconstruction Algorithms:**
-- **SART** (Simultaneous Algebraic Reconstruction Technique) - Best for quality
-- **SIRT** (Simultaneous Iterative Reconstruction Technique) - Balanced approach
-- **MART** (Multiplicative Algebraic Reconstruction Technique) - Alternative method
+### Reconstruction Algorithms
+- **SART** (Simultaneous Algebraic Reconstruction Technique) – High-quality, fast convergence  
+- **SIRT** (Simultaneous Iterative Reconstruction Technique) – Smoother, less noisy results  
+- **MART** (Multiplicative Algebraic Reconstruction Technique) – Multiplicative update method
 
-✅ **Advanced Features:**
-- Fan-beam geometry support
-- Negative-log preprocessing
-- Multi-threaded processing (OpenMP)
-- Command-line interface
-- Progress monitoring with time estimates
-- Bilinear interpolation
-- Non-negativity constraints
+### Implementation Highlights
+- Fan-beam geometry support  
+- Negative-log preprocessing  
+- Multi-threaded CPU reconstruction using OpenMP  
+- Bilinear interpolation  
+- Non-negativity constraints  
+- Command-line interface with progress updates  
+- No GPU dependencies
 
-✅ **No External Dependencies** (except standard libraries):
-- Only requires: libtiff, OpenMP, C++17 compiler
+---
 
-## Quick Start
+## Requirements
 
-### 1. Setup and Build
+**System Requirements**
+- CPU with OpenMP support  
+- 16 GB RAM or more recommended for full-volume reconstruction
+
+**Software Dependencies**
+- C++17 or newer compiler (GCC / Clang / MSVC)
+- CMake ≥ 3.10
+- libtiff (for reading `.tif` projections)
+- OpenMP (for multithreading)
+
+**Example installation (Ubuntu):**
+```bash
+sudo apt update
+sudo apt install build-essential cmake libtiff-dev
+```
+
+---
+
+## Build Instructions
+
+### 1. Setup
 
 ```bash
-# Create project directory
-cd ~
-mkdir -p ct_reconstruction && cd ct_reconstruction
+# Create and enter the project directory
+mkdir -p ~/ct_reconstruction && cd ~/ct_reconstruction
 
-# Copy the source files:
-# - ct_reconstruction.cpp (from artifact above)
-# - CMakeLists.txt (from artifact above)
+# Copy source files:
+# - ct_reconstruction.cpp
+# - CMakeLists.txt
+```
 
-# Build
+### 2. Build
+
+```bash
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 ```
 
-### 2. Prepare Your Data
+This creates the executable `ct_recon` in the `build/` directory.
+
+---
+
+## Input Data Preparation
 
 ```bash
-# Create input directory
+# Create the input directory
 mkdir -p ../raw/projections
 
-# Copy your .tif projection files to:
+# Copy projection .tif images into:
 # ~/ct_reconstruction/raw/projections/
 
-# Files should be named sequentially (e.g., proj_0001.tif, proj_0002.tif, ...)
+# File naming convention:
+# proj_0001.tif, proj_0002.tif, ..., proj_0360.tif
 ```
 
-### 3. Run Reconstruction
+All projection images must have identical dimensions.
 
+#### source: "https://drive.google.com/drive/folders/1eJ27DzfssGl5s2eUk7Hzn5H27Xl8iikA"
+
+---
+
+## Running Reconstruction
+
+### Basic Usage
 ```bash
-# Basic usage (SART algorithm, 50 iterations)
 ./ct_recon
+```
 
-# With custom parameters
+### Custom Options
+```bash
+# SART with 100 iterations
 ./ct_recon --algorithm SART --iterations 100 --relaxation 0.7
 
-# SIRT algorithm
-./ct_recon --algorithm SIRT --iterations 100 --relaxation 0.5
+# SIRT with 150 iterations
+./ct_recon --algorithm SIRT --iterations 150 --relaxation 0.5
 
-# MART algorithm
+# MART with 30 iterations
 ./ct_recon --algorithm MART --iterations 30 --relaxation 0.3
 
-# Reconstruct specific slice range
+# Reconstruct only selected slices
 ./ct_recon --z-min 100 --z-max 200
 
-# See all options
+# Show all options
 ./ct_recon --help
 ```
 
+---
+
 ## Command-Line Options
 
-```
---proj-folder PATH      Input projection folder (default: ./raw/projections)
---output-folder PATH    Output reconstruction folder (default: ./raw/reconstruction_1)
---algorithm ALG         Algorithm: SART, SIRT, or MART (default: SART)
---iterations N          Number of iterations (default: 50)
---relaxation R          Relaxation parameter 0.0-1.0 (default: 0.5)
---z-min N              Minimum slice index (default: 0)
---z-max N              Maximum slice index (default: 999)
---threads N            Number of threads (default: auto)
---no-log               Skip negative-log preprocessing
---help                 Show help message
-```
+| Option | Description | Default |
+|--------|--------------|----------|
+| `--proj-folder PATH` | Input projections folder | `./raw/projections` |
+| `--output-folder PATH` | Output folder | `./raw/reconstruction_1` |
+| `--algorithm ALG` | Algorithm: `SART`, `SIRT`, or `MART` | `SART` |
+| `--iterations N` | Number of iterations | `50` |
+| `--relaxation R` | Relaxation factor (0.0–1.0) | `0.5` |
+| `--z-min N` | Minimum slice index | `0` |
+| `--z-max N` | Maximum slice index | `999` |
+| `--threads N` | Number of CPU threads | auto |
+| `--no-log` | Skip negative-log preprocessing | off |
+| `--help` | Display usage information | — |
 
-## Algorithm Comparison
+---
 
-| Algorithm | Speed | Quality | Best Use Case |
-|-----------|-------|---------|---------------|
-| **SART** | Fast | High | General purpose, best quality per iteration |
-| **SIRT** | Medium | High | Smoother results, less noise |
-| **MART** | Slow | Good | Specific applications, multiplicative updates |
+## Algorithm Notes
 
-### Recommended Parameters
+| Algorithm | Typical Iterations | Relaxation | Notes |
+|------------|--------------------|-------------|--------|
+| **SART** | 50–100 | 0.5–0.7 | Best balance of speed and quality |
+| **SIRT** | 100–200 | 0.3–0.5 | Produces smoother, low-noise output |
+| **MART** | 20–50 | 0.1–0.3 | Specialized multiplicative update scheme |
 
-**SART:**
-- Iterations: 50-100
-- Relaxation: 0.5-0.7
-- Best for: Fast, high-quality reconstruction
-
-**SIRT:**
-- Iterations: 100-200
-- Relaxation: 0.3-0.5
-- Best for: Smooth, low-noise results
-
-**MART:**
-- Iterations: 20-50
-- Relaxation: 0.1-0.3
-- Best for: Specialized applications
+---
 
 ## Geometry Configuration
 
-Edit the `GeometryConfig` struct in `ct_reconstruction.cpp`:
+Adjust in `ct_reconstruction.cpp`:
 
 ```cpp
 struct GeometryConfig {
-    int num_projections = 360;        // Number of projection angles
-    int detector_rows = 1000;         // Detector height in pixels
-    int detector_cols = 1000;         // Detector width in pixels
-    float sod_mm = 160.0f;           // Source-to-object distance (mm)
-    float sdd_mm = 200.0f;           // Source-to-detector distance (mm)
-    float pixel_size_mm = 0.048f;    // Detector pixel size (mm)
-    float cor_pixel = 518.0f;        // Center of rotation (pixels)
-    float voxel_size_mm = 0.0384f;   // Reconstruction voxel size (mm)
-    int recon_xy_dim = 1000;         // Reconstruction image size
+    int num_projections = 360;
+    int detector_rows = 1000;
+    int detector_cols = 1000;
+    float sod_mm = 160.0f;     // Source-to-object distance (mm)
+    float sdd_mm = 200.0f;     // Source-to-detector distance (mm)
+    float pixel_size_mm = 0.048f;
+    float cor_pixel = 518.0f;  // Center of rotation (pixels)
+    float voxel_size_mm = 0.0384f;
+    int recon_xy_dim = 1000;   // Reconstruction resolution
 };
 ```
 
-## Performance Tips
+---
 
-1. **Use Release Build:**
-   ```bash
-   cmake .. -DCMAKE_BUILD_TYPE=Release
-   ```
-
-2. **Optimize Thread Count:**
-   ```bash
-   # Auto-detect (default)
-   ./ct_recon
-   
-   # Manual setting
-   ./ct_recon --threads 8
-   ```
-
-3. **Process Subset for Testing:**
-   ```bash
-   # Test on 10 slices first
-   ./ct_recon --z-min 500 --z-max 510 --iterations 20
-   ```
-
-4. **Algorithm Selection:**
-   - SART: Fastest convergence
-   - SIRT: Best quality/smoothness
-   - MART: Specialized cases
 
 ## Output
 
@@ -173,68 +176,29 @@ raw/reconstruction_1/SART_reconstruction/slice_0001.tif
 ...
 ```
 
-## Troubleshooting
+**Note:**  
+Output `.tif` slices may appear dark due to low pixel intensities.  
+Increase image brightness in your viewer to visualize structures.
 
-### Build Errors
+![CT Reconstruction Output](./output.png)
 
-**Error: `filesystem` not found**
-```bash
-# Update compiler or add explicit linking
-target_link_libraries(ct_recon stdc++fs)
-```
+---
 
-**Error: TIFF library not found**
-```bash
-# Ubuntu/Debian
-sudo apt-get install libtiff-dev
-
-# CentOS/RHEL
-sudo yum install libtiff-devel
-
-# macOS
-brew install libtiff
-```
-
-**Error: OpenMP not found**
-```bash
-# Usually included with gcc/clang
-# For macOS with Homebrew:
-brew install libomp
-```
-
-### Runtime Issues
-
-**Out of memory:**
-- Reduce number of slices with `--z-min` and `--z-max`
-- Reduce reconstruction dimensions in config
-- Process in batches
-
-**Slow performance:**
-- Use `--threads` to adjust thread count
-- Reduce iterations for testing
-- Use SART instead of SIRT/MART
-
-**Poor quality:**
-- Increase iterations
-- Adjust relaxation parameter
-- Try different algorithms
-- Check input data preprocessing
 
 ## Example Workflow
 
 ```bash
-# 1. Quick test (10 slices, 20 iterations)
+# Quick test (10 slices, 20 iterations)
 ./ct_recon --algorithm SART --iterations 20 --z-min 500 --z-max 510
 
-# 2. If good, full reconstruction
+# Full reconstruction
 ./ct_recon --algorithm SART --iterations 50
 
-# 3. Try SIRT for smoother results
+# Compare SIRT for smoother results
 ./ct_recon --algorithm SIRT --iterations 100 --relaxation 0.4
-
-# 4. Compare algorithms
-./ct_recon --algorithm MART --iterations 30 --relaxation 0.2
 ```
+
+---
 
 ## Technical Details
 
@@ -245,24 +209,19 @@ brew install libomp
 
 ### Back Projection
 - Weighted contribution along rays
-- Atomic operations for thread safety
-- Normalized by ray weights
+- Thread-safe accumulation
+- Normalized updates
 
 ### Convergence
-- Non-negativity constraint
-- Relaxation parameter control
-- Projection-by-projection (SART) or simultaneous (SIRT) updates
+- Controlled by relaxation parameter
+- Non-negativity constraint enforced
+- Slice-by-slice sequential processing
 
-## License
+---
 
-This is a research/educational implementation. Modify as needed for your application.
 
-## References
-
-- Andersen, A. H., & Kak, A. C. (1984). "Simultaneous algebraic reconstruction technique (SART)"
-- Gilbert, P. (1972). "Iterative methods for the three-dimensional reconstruction of an object from projections"
-- Gordon, R., Bender, R., & Herman, G. T. (1970). "Algebraic Reconstruction Techniques (ART)"
 
 ## Contact
 
-For issues or questions about the implementation, refer to the ASTRA Toolbox documentation for algorithm details.
+**Gaurav Kumar**
+Email: *gaurav_k@mfs.iitr.ac.in*  
