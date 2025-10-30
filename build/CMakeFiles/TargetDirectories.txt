@@ -1,0 +1,7 @@
+/teamspace/studios/this_studio/build/CMakeFiles/ct_recon.dir
+/teamspace/studios/this_studio/build/CMakeFiles/edit_cache.dir
+/teamspace/studios/this_studio/build/CMakeFiles/rebuild_cache.dir
+/teamspace/studios/this_studio/build/CMakeFiles/list_install_components.dir
+/teamspace/studios/this_studio/build/CMakeFiles/install.dir
+/teamspace/studios/this_studio/build/CMakeFiles/install/local.dir
+/teamspace/studios/this_studio/build/CMakeFiles/install/strip.dir

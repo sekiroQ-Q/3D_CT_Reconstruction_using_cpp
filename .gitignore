@@ -1,0 +1,17 @@
+# Build folders
+/build/
+bin/
+out/
+dist/
+debug/
+release/
+
+
+
+# VSCode settings
+.vscode/
+.settings/
+.lightning_studio/
+# Mac / Windows system files
+.DS_Store
+Thumbs.db
